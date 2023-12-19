@@ -20,8 +20,8 @@ public class CentralVerticle extends AbstractVerticle {
     public String HOST = "http://localhost" ; 
     public Router router ; 
     public void  endpoints(){
-         UserEndpoint endpoint4 = new UserEndpoint(vertx,router,true) ;
-        
+         UserEndpoint1 endpoint4 = new UserEndpoint1(vertx,router,true) ;
+        UserEndpoint2  endpoint5 =  new UserEndpoint2(vertx,router, true) ; 
     }     
 
     public HttpServerOptions CreateOptions( ){
