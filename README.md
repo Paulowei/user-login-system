@@ -1,2 +1,2 @@
 # Snake.java
-The source code of an applet for snake in java
+A web application for a user login system ,based on the concept of JWT Auth tokens ; 
