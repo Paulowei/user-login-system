@@ -90,8 +90,9 @@ public class UserEndpoint2 {
                                         public void handle(AsyncResult<User> asyncs4){
                                             if(asyncs4.failed()){
                                               Tools.HandleResponse(intent.response(),new JsonObject(),asyncs4.cause().toString(),false,true,true) ; 
-                                            }else{
-                                                Future<JsonObject> futures6 = services.editUserCrypt(jsons3.getJsonObject("user"),jsons3.getString("type"),jsons3.getString("value")) ;  
+                                            }else{  
+                                                JsonObject types = asyncs4.result().attributes() ; // jsons3.getJsonObject("user")
+                                                Future<JsonObject> futures6 = services.editUserCrypt(types.getJsonObject("accessToken"),jsons3.getString("types"),jsons3.getString("value")) ;  
                                                 futures6.onComplete( 
                                                     new Handler<AsyncResult<JsonObject>>(){
                                                         @Override 
@@ -125,7 +126,7 @@ public class UserEndpoint2 {
                         new Handler<Throwable>(){
                             @Override 
                             public void handle(Throwable thrown){
-                                Tools.HandleResponse(reach.response(), new JsonObject( ), thrown.toString( ),false,true,true) ;  
+                  Tools.HandleResponse(reach.response(), new JsonObject( ), thrown.toString( ),false,true,true) ;  
                             }
                         }
                     ).
@@ -137,8 +138,9 @@ public class UserEndpoint2 {
                     jwts.authenticate(jsons5).onComplete(
                         new Handler<AsyncResult<User>>( ){
                             @Override 
-                            public void handle( AsyncResult<User> asyncs){
-                    Future<JsonObject> updates =   services.deleteUser(jsons5.getJsonObject("user")) ; 
+                            public void handle( AsyncResult<User> asyncs){    
+                        JsonObject jsons4 = asyncs.result().attributes() ;
+                    Future<JsonObject> updates =   services.deleteUser(jsons4.getJsonObject("accessToken")) ;//(jsons5.getJsonObject("user")) ; 
                      //(jsons5.getString("email"))  ;  //(mapper.get("email")) ; 
                     updates.onSuccess(
                          new Handler<JsonObject>(){
@@ -175,8 +177,9 @@ public class UserEndpoint2 {
                             new Handler<AsyncResult<User>>( ){
                                 @Override 
                                 public void handle (AsyncResult<User> depend4){ 
-                                    if(depend4.succeeded()){
-                     Future<JsonObject> updates = services.editUserByEmail(params.get("email"),params.get("types"),params.get("value")) ;  
+                                    if(depend4.succeeded()){  
+                            JsonObject dues =  depend4.result().attributes().getJsonObject("accessToken")  ; /// params.get("email")
+                     Future<JsonObject> updates = services.editUserByEmail(dues.getString("email"),params.get("types"),params.get("value")) ;  
                             updates.onComplete(
                                 new Handler<AsyncResult<JsonObject>>(){
                                     @Override 
@@ -215,12 +218,16 @@ public class UserEndpoint2 {
                                          futures2.onComplete(
                                             new Handler<AsyncResult<User>>(){
                                                 @Override 
-                                                public void  handle(AsyncResult<User> pending3){
-                                                    if(pending3.succeeded()){   // getJsonObject("user")
-                                        Future<JsonObject> futures3 = services.editUserOptions(jsons3.getJsonObject("user"),jsons3.getJsonObject("options")) ;
-                                                futures3.onSuccess(new Handler<JsonObject>(){
-                                                    @Override 
-                                                    public void handle(JsonObject jsons4)
+                                                public void  handle(AsyncResult<User> pending3){           
+                                                    if(pending3.succeeded()){   // getJsonObject("user")      
+                                                System.out.println(pending3.result().principal())  ;        
+                                             //   System.out.println(pending3.result().attributes()) ; 
+                                                System.out.println(pending3.result().subject()) ;  //jsons3.getJsonObject("user") ; 
+                                                JsonObject recent = pending3.result().attributes()     ;    
+                                        Future<JsonObject> futures3 = services.editUserOptions(recent.getJsonObject("accessToken"),jsons3.getJsonObject("options")) ;
+                                                futures3.onSuccess(new Handler<JsonObject>(){           
+                                                    @Override       
+                                                    public void handle(JsonObject jsons4)    
                                                     {Tools.HandleResponse(context.response(),jsons4,lines[0],true,true,true) ;}
                                                 }).onFailure(
                                                     new Handler<Throwable>(){
@@ -257,8 +264,9 @@ public class UserEndpoint2 {
                                                 new Handler<User>( ){
                                                     @Override 
                                                     public void handle(User users3){  
-                                                  //      System.out.println(jsons4.getJsonObject("options")) ;
-                                                        Future<JsonObject> confirms = services.deleteUserOptions(jsons4.getJsonObject("user"),jsons4.getJsonObject("options")) ; 
+                                                  //      System.out.println(jsons4.getJsonObject("options")) ;  
+                                                  JsonObject created = users3.attributes().getJsonObject("accessToken") ; //jsons4.getJsonObject("user"),
+                                                        Future<JsonObject> confirms = services.deleteUserOptions(created,jsons4.getJsonObject("options")) ; 
                                                         confirms.onFailure(
                                                             new Handler<Throwable>(){
                                                                 @Override 

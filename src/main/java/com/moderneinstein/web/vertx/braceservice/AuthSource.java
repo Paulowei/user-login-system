@@ -15,7 +15,7 @@ public class AuthSource  {
 
     public static JWTAuth  central   = null  ;   // C:\\Users\\201204040\\Documents\\Centre\\Codebases\\user-login-system\\target\\
     private static String PASSWORD=   new String("password")  ;  
-    private static String PATHS = new String("user-login.keystore") ;     
+    private static String PATHS = new String("target/user-login.keystore") ;     
     public static String ISSUER =  "User-Login-System" ;    
      private static String[] ALGORITHMS = {"RS256","HS256"} ;  
     public static String SUBJECT  = "User-Login-System" ; 

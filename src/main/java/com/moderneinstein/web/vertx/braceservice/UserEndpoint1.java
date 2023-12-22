@@ -195,8 +195,9 @@ public void serveRoutes2( ){
                                     new Handler<AsyncResult<User>>(){
                                         @Override 
                                         public void handle(AsyncResult<User> pending){  
-                                        if(pending.succeeded()){
-                                Future<JsonObject> possible = services.editUserOptions(input.getJsonObject("user"),input.getJsonObject("options")) ; 
+                                        if(pending.succeeded()){    // input.getJsonObject("user")
+                                JsonObject jsons5 = pending.result().attributes() ; 
+                                Future<JsonObject> possible = services.editUserOptions(jsons5.getJsonObject("accessToken"),input.getJsonObject("options")) ; 
                                 possible.onSuccess (
                                     new Handler<JsonObject>(){
                                         @Override 

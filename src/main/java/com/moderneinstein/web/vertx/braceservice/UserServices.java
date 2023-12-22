@@ -29,11 +29,13 @@ import java.util.HashMap ;
 import java.util.Collection ; 
 import java.util.List ; 
 import java.util.Vector ; 
+import java.util.LinkedList ;
+
 
 public class UserServices  {
 
     public MongoClient central  ; 
-    public static String bases = new String("Users4")  ;   
+    public static String bases = new String("Users6"); //("Users4")  ;   
     public Vertx context ;      
      private static HashingStrategy strategy  ;   
      private static String[] methods = new String[] {"sha512","pbkdf2"} ;  //HashingString
@@ -59,40 +61,56 @@ public class UserServices  {
 
       //   );
     }
-    //        JsonObject primaries = new JsonObject().put("email",toFind.getEmail())  ;
-    public void ensureNotFound(JsonObject toFind,Promise<JsonObject> premise){ 
+    //        JsonObject primaries = new JsonObject().put("email",toFind.getEmail())  ;  
+    //    Promise<JsonObject> premise)  //  void  //  ,Promise<Boolean> premise
+    public Future<Boolean>  ensureNotFound(JsonObject toFind){ 
         JsonObject primaries =  toFind.copy() ; 
          // toFind.clone() ; //new JsonObject().put("email",toFind.getEmail())  ; 
-          Future<List<JsonObject>> futures =  central.find(bases,primaries) ; 
+          Future<List<JsonObject>> futures =  central.find(bases,primaries) ;  
+          Promise<Boolean> promises4 = Promise.promise() ; 
         futures.onSuccess(
             new  Handler<List<JsonObject>>(){
                 @Override 
                 public void handle(List<JsonObject> jsons){
                     if(jsons!=null&&jsons.size ()>0){
-                        premise.fail(new  ServerError("The credentials were found previously")) ;
-                    }
+                     //   premise.fail(new  ServerError("The credentials were found previously")) ;
+                         promises4 .complete(true ) ;  }
+                    if(jsons.size()==0){promises4.complete(false) ;}
                 }
-            }
+            }  
         ) ; 
         futures.onFailure(
             new Handler<Throwable>(){
                 @Override 
                 public void handle(Throwable error){
-
+                 promises4.fail(error) ; ///   premise.fail (error) ; 
                 }
             }
-        ) ;
+        ) ;  
+             return promises4.future()  ;  
     }  
    // public Stream<Map.Entry<String,Object>> stream(){} ; 
   //  public Iterator<Map.Entry<String,Object>> iterator(){}  ;
  //   public <F> JsonObject mapFrom(F  verse){} ; 
  //   public <C> C mapTo(Class<C> templates){} ;   
- // public Future<BraceUser> saveUser(BraceUser voltage){  // 
+ // public Future<BraceUser> saveUser(BraceUser voltage){  //   
+    //,promises ) ; // plans) ;  //     new Handler<AsyncResult<JsonObject>>()
+      //  if(!plans.future().failed()){return plans.future() ; } plans.    
+          //  Promise<Boolean>  promises = Promise.promise() ;   //   promises 
      public Future<JsonObject> saveUser(JsonObject voltage){
         JsonObject initial = voltage.copy() ;   // voltage.clone( ) ; 
        Promise<JsonObject> plans = Promise.promise() ;  
-       ensureNotFound(initial,plans) ;
-        if(!plans.future().failed()){return plans.future() ; }     
+        Future<Boolean> futures5 =  ensureNotFound(initial ) ; 
+         futures5.onComplete(     
+        new Handler<AsyncResult<Boolean>>(){
+            @Override 
+            public void handle(AsyncResult<Boolean> causes){
+            if(causes.failed()){
+                  plans.fail(causes.cause() )  ;
+                  return ;     }    
+        if(causes.result()==true ){
+            plans.fail(new ServerError("The Details were found previously")) ; 
+            return   ; }
          central.save(bases,initial).onComplete(
             new Handler<AsyncResult<String>>(){
                 @Override 
@@ -105,7 +123,7 @@ public class UserServices  {
                                 public void handle(MongoClientUpdateResult result){
                                      initial.put("identity",pending.result()) ; 
                                      plans.complete(initial) ; 
-                                } }   ) ; } }  } ) ;  
+                                } }   ) ; } }  } ) ; }} ) ;  
          return plans.future( ) ;  
     }    
     //   plans.succeed(Utilities.deSerialiseUser(initial)) ; 
@@ -151,14 +169,15 @@ public class UserServices  {
         futures.onSuccess(new Handler<List<JsonObject>>(){
             @Override 
             public void handle(List<JsonObject> listed){
-                unknown.complete(listed) ;   }  } ) ; 
+                Collection<JsonObject> collected =   Tools.filter("password",listed) ;
+                unknown.complete(new LinkedList<JsonObject>(listed)) ;   }  } ) ; 
         futures.onFailure(new Handler<Throwable>( ){
             @Override 
             public void handle(Throwable thrown){
                 unknown.fail(thrown ) ; } }) ; 
         return  unknown.future( ) ; 
     }     
-
+    //      //    objects.remove("password") ; 
     public Future<JsonObject> findUserByEmail(String email){
             JsonObject input =   new JsonObject().put("email",email) ; //email.clone() ;
             Promise<JsonObject> premise = Promise.promise() ;
@@ -166,8 +185,12 @@ public class UserServices  {
             found.onSuccess ( 
                 new Handler<List<JsonObject>>(){
                     @Override 
-                    public void handle(List<JsonObject> objects){
-                        premise.complete(objects.get(0)) ; }}) ; 
+                    public void handle(List<JsonObject> objects){     
+                        if(objects.size()>=0){
+                            JsonObject present = objects.get(0) ; 
+                            present.remove("password")  ;
+                          premise.complete(present) ; //  premise.complete(objects.get(0)) ;
+                    } }}) ; 
             found.onFailure(
                 new Handler<Throwable>(){
                     @Override 
@@ -184,7 +207,7 @@ public class UserServices  {
         JsonObject similar =  special.copy() ;  //special.clone() ;
         Promise<JsonObject> promises = Promise.promise( ) ; 
         JsonObject attempt = new JsonObject( ).put("email",similar.getString("email")) ; 
-        System.out.println(special.toString( )) ; 
+      //  System.out.println(special.toString( )) ; 
         central.find(bases,attempt).onComplete(  //similar,
          new Handler<AsyncResult<List<JsonObject>>>(){
             @Override 
@@ -203,15 +226,24 @@ public class UserServices  {
     }     
     //  JsonObject others =  // input.clone().put ("message",pending.result()) ;    
     // AsyncResult<MongoClientUpdateResult> asyncs  
-          //  System.out.println(input.toString()) ; 
+          //  System.out.println(input.toString()) ; //               //,plans) ; 
+          //  if(plans.future().failed()){return  plans.future() ; }
     public Future<JsonObject> saveUserCrypt(JsonObject  input){  
             String  password = input.getString("password") ;   
             String  hashString = strategy.hash(methods[1],mapper,hashSalt,password) ;  
             JsonObject clones =  input.copy() ;  clones.remove("password") ;   
             clones.put("password",hashString) ;     
             Promise<JsonObject> plans = Promise.promise () ;    
-            ensureNotFound(new JsonObject().put("email",input.getString("email")),plans) ; 
-            if(plans.future().failed()){return  plans.future() ; }
+            ensureNotFound(new JsonObject().put("email",input.getString("email"))).onComplete(
+                new Handler<AsyncResult<Boolean>>(){
+                    @Override 
+                    public void handle(AsyncResult<Boolean> pending4){
+                if(pending4.failed()){
+                    plans.fail(pending4.cause()) ; 
+                    return  ;   }  
+                if(pending4.result()==true){  // ("Credentials not found previously")
+                 plans.fail(new ServerError("Credentials were found previously")) ;
+                return    ;      }
             Future<String> ahead  =  central.save(bases,clones ).onComplete(
                 new Handler<AsyncResult<String>>(){
                     @Override
@@ -229,7 +261,7 @@ public class UserServices  {
                                 }
                             }) ; 
                           //   plans.succeed(others) ; 
-                        }else{plans.fail(pending.cause()) ;  }  }  } ) ; 
+                        }else{plans.fail(pending.cause()) ;  }  }  } ) ;  }}); 
             return plans.future() ; 
      }       
      //  JsonObject nexts =  clones.copy().put("identity",pending.result())  ; 
@@ -247,8 +279,9 @@ public class UserServices  {
 			 Map<String,Object> mappers =  (Map<String,Object>)objects; */
 	public Future<JsonObject> editUserOptions(JsonObject user,JsonObject options){
 	JsonObject clones1 = new JsonObject().put("email",user.getString("email")) ; 
-	 Promise<JsonObject> promises = Promise.promise(); 
-	 Future<JsonObject> found = findUserCrypt( user )  ; //  central.findOne (bases,clones1) ;  
+	 Promise<JsonObject> promises = Promise.promise();   
+     //   System.out.println(44) ; 
+	 Future<JsonObject> found  =  findUserByEmail(user.getString("email")) ;  // findUserCrypt( user )  ; //  central.findOne (bases,clones1) ;  
 	 found.onSuccess(
 	 new Handler<JsonObject>(){
 		 @Override 
@@ -280,7 +313,7 @@ public class UserServices  {
         	//	JsonObject searches  = new JsonObject( ).put("email",email) ; 
 		public Future<JsonObject> deleteUserOptions(JsonObject user,JsonObject remove ){  
 			Promise<JsonObject> futures = Promise.promise() ;  
-           Future<JsonObject> found = findUserCrypt(user)  ;    
+           Future<JsonObject> found =  findUserByEmail(user.getString("email"))  ; // findUserCrypt(user)  ;    
 			found.onComplete( new Handler<AsyncResult<JsonObject>>(){
 				 @Override 
 				 public void handle(AsyncResult<JsonObject> asyncs){
@@ -336,10 +369,11 @@ public class UserServices  {
       //  public Future<JsonObject> deleteUser(String email ){      
         //   handle (AsyncResult<JsonObject> asyncs5)  
         //  source.copy(); // new JsonObject( ).put("email" , email )  ;  
+        //findUserCrypt(source) 
         public Future<JsonObject>  deleteUser (JsonObject source){
             Promise<JsonObject>  promises1  = Promise.promise( ) ; 
             JsonObject deleted  = new JsonObject().put("email",source.getString("email")) ;
-            findUserCrypt(source).onComplete(
+            findUserByEmail(source.getString("email")).onComplete(
                 new Handler<AsyncResult<JsonObject>>(){
                     @Override 
                     public void handle (AsyncResult<JsonObject>  pending5){
@@ -374,7 +408,7 @@ public class UserServices  {
                 new Handler<List<JsonObject>>( ){
                     @Override 
                     public void handle(List<JsonObject> listed){  
-                        Collection collected = Tools.filter(new String("password"),listed) ;
+                        Collection<JsonObject> collected = Tools.filter(new String("password"),listed) ;
                         promise5.complete(new Vector<JsonObject>(collected)) ; 
                     }
                 }
@@ -397,7 +431,7 @@ public class UserServices  {
                 return promise5.future() ; 
         }   
     public Future<JsonObject> editUserCrypt(JsonObject user,String key,String value){
-          Future<JsonObject> futures3 =  findUserCrypt(user) ; 
+          Future<JsonObject> futures3 =  findUserByEmail( user.getString("email")) ; // findUserCrypt(user) ; 
          JsonObject changes = new JsonObject().put("$set",new JsonObject().put(key, value)) ; 
          Promise<JsonObject> promise3 = Promise.promise()  ;
         futures3.onComplete(
@@ -413,14 +447,15 @@ public class UserServices  {
                                 promise3.fail(error) ;} } )
                                 .onSuccess(new Handler<MongoClientUpdateResult>(){
                                     @Override  
-                                    public void handle(MongoClientUpdateResult  update4){
+                                    public void handle(MongoClientUpdateResult  update4){  
+                                        System.out.println(update4.toJson().toString()) ; 
                                         promise3.complete(update4.toJson()) ;
                                     }
                                 }) ;  
                      }else{promise3.fail(asyncs4.cause().toString()) ;}
                 }
             })   ;
-            return  futures3  ;
+            return  promise3.future() ; //  futures3  ;
     }
       //  public Future<JsonObject> updateUser
 }

@@ -18,7 +18,7 @@ public class ServerError extends Exception{
     public String toString(){  
         String upper = super.toString() ;   
         String combine = upper.concat (new String("\n"))   ;
-        upper= upper.concat(this.internal ) ;
+        upper= upper.concat(" ").concat(this.internal ) ;
         return  upper   ;    //  = = //this.internal ; 
     }
     
