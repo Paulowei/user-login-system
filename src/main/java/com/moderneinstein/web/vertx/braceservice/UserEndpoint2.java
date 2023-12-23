@@ -200,7 +200,11 @@ public class UserEndpoint2 {
                         }
                     }
                 ) ;
-                }    
+                }      
+                /*  // getJsonObject("user")      
+                        System.out.println(pending3.result().principal())  ;        
+                      //   System.out.println(pending3.result().attributes()) ; 
+              System.out.println(pending3.result().subject()) ;  //jsons3.getJsonObject("user") ;  */
                 public void serveRoutes4(){
                     Route route4 = router.route() ; 
                     route4.path("/services/users/editoptions") ; 
@@ -219,10 +223,9 @@ public class UserEndpoint2 {
                                             new Handler<AsyncResult<User>>(){
                                                 @Override 
                                                 public void  handle(AsyncResult<User> pending3){           
-                                                    if(pending3.succeeded()){   // getJsonObject("user")      
-                                                System.out.println(pending3.result().principal())  ;        
-                                             //   System.out.println(pending3.result().attributes()) ; 
-                                                System.out.println(pending3.result().subject()) ;  //jsons3.getJsonObject("user") ; 
+                                                    if(pending3.succeeded()){ 
+                                                     System.out.println(pending3.result().principal())  ;        
+                                                   System.out.println(pending3.result().attributes()) ; 
                                                 JsonObject recent = pending3.result().attributes()     ;    
                                         Future<JsonObject> futures3 = services.editUserOptions(recent.getJsonObject("accessToken"),jsons3.getJsonObject("options")) ;
                                                 futures3.onSuccess(new Handler<JsonObject>(){           
