@@ -39,7 +39,9 @@ public class UserServices  {
     public Vertx context ;      
      private static HashingStrategy strategy  ;   
      private static String[] methods = new String[] {"sha512","pbkdf2"} ;  //HashingString
-     private static String hashSalt = new String("HashingSaltHashingString") ; 
+     private static String hashSalt = new String("HashingSaltHashingString") ;  
+     private String Algorithm  ; 
+     private String HashingSalt ;
    //  new String("HashingStringHashingStringHashreagertdhrewgrsewgawrgthjzehtrsWRetsezRets
    //zhREtbwfraethsrjerewGrbaethsrsvgfweadfgbbgrzdgbzshrtegthtgrhsgzdfsdfggweqergsewrgfhgtf") ;  
      private Map<String,String> mapper ; 
@@ -56,7 +58,10 @@ public class UserServices  {
     public UserServices (Vertx  parent){
         this.central = ConnectionSource.deriveSource(parent,bases) ;  // source ;     
          this.context = parent ;       
-        strategy = HashingStrategy.load( ) ;  
+        strategy = HashingStrategy.load( ) ;   
+        HashingSalt =   CentralVerticle.properties.getProperty("hashing-salt"); 
+        Algorithm =  CentralVerticle.properties.getProperty("hashing-algorithm") ;
+
       //  System.out.println(33) ; 
 
       //   );
@@ -227,10 +232,11 @@ public class UserServices  {
     //  JsonObject others =  // input.clone().put ("message",pending.result()) ;    
     // AsyncResult<MongoClientUpdateResult> asyncs  
           //  System.out.println(input.toString()) ; //               //,plans) ; 
-          //  if(plans.future().failed()){return  plans.future() ; }
+          //  if(plans.future().failed()){return  plans.future() ; }  
+          // String  hashString = strategy.hash(methods[1],mapper,hashSalt,password) ;  
     public Future<JsonObject> saveUserCrypt(JsonObject  input){  
             String  password = input.getString("password") ;   
-            String  hashString = strategy.hash(methods[1],mapper,hashSalt,password) ;  
+            String  hashString = strategy.hash(Algorithm,mapper,HashingSalt,password) ;  
             JsonObject clones =  input.copy() ;  clones.remove("password") ;   
             clones.put("password",hashString) ;     
             Promise<JsonObject> plans = Promise.promise () ;    
