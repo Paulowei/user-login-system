@@ -31,12 +31,14 @@ public class ConnectionSource{
 ,"mongodb+srv://User5:TreeNode@cluster5.nip9d3w.mongodb.net/?retryWrites=true&w=majority"
 ,"mongodb+srv://cluster5.nip9d3w.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority"} ; 
     public static JsonObject createParts (){
-        JsonObject  portions = new JsonObject() ;   
-        portions.put("connection_string",MongoOptions[7]) ; 
+        JsonObject  portions = new JsonObject() ;     
+        String sample = CentralVerticle.properties.getProperty("mongodb-connection-string") ;
+        portions.put("connection_string",sample) ; 
         portions.put("db_name",MongoOptions[0]) ; 
         portions.put("useObjectId",true) ; 
          return portions ;  
-    }
+    } 
+    // MongoOptions[7]// CentralVerticle.properties.getProperty (sample)
     public static  void configure(Vertx prior){
         point = prior   ;   
     }    
