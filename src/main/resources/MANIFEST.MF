@@ -1,7 +1,7 @@
 Main-Class: com.moderneinstein.web.vertx.braceservice.CentralVerticle 
-Specification-Version:  
-Specification-Vendor: 
-Specification-Title: 
-Implementation-Version: 
-Implementation-Vendor: 
-Implementation-Title:
+Specification-Version: 2.4
+Specification-Vendor: Paul Owei
+Specification-Title: User-Login-System
+Implementation-Version: 2.4
+Implementation-Vendor: Paul Owei
+Implementation-Title: User-Login-System
